@@ -1,5 +1,5 @@
-# Python-CLI-Reminder
-# 🕒 Python Reminder App
+# 🕒Python-CLI-Reminder
+
 
 A **text-based reminder application** built with Python that sends both **desktop notifications** and **email alerts** at scheduled times. It supports saving and loading reminders using a JSON file, and runs in the background using threading.
 
