@@ -1,0 +1,155 @@
+import datetime
+import json
+import os
+import time
+import threading
+import smtplib
+from email.message import EmailMessage
+from plyer import notification
+import re
+reminders = []
+
+# Function to show desktop notification
+def send_notification(title, message):
+    notification.notify(
+        title=title,
+        message=message,
+        timeout=10
+    )
+
+# Function to send email (using Gmail SMTP)
+def send_email(subject, body, to_email):
+    try:
+        sender_email = "xyz123@gmail.com"         # <-- Change this
+        sender_password = "............."         # <-- Use app password, not your real one
+
+        msg = EmailMessage()
+        msg['Subject'] = subject
+        msg['From'] = sender_email
+        msg['To'] = to_email
+        msg.set_content(body)
+
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+            smtp.login(sender_email, sender_password)
+            smtp.send_message(msg)
+        print(f"Email sent to {to_email}")
+    except Exception as e:
+        print("Error sending email:", e)
+
+# Background thread to check reminders
+def reminder_checker():
+    while True:
+        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        for reminder in reminders[:]:  # Use slice to avoid modifying_list during iteration
+            if reminder["Date_Time"] == now:
+                send_notification(reminder["Title"], f"Reminder: {reminder['Title']} at {reminder['Date_Time']}")
+                send_email("Reminder Alert", f"Reminder: {reminder['Title']} at {reminder['Date_Time']}", reminder["Email"])
+                print(f"\nReminder: {reminder['Title']} at {reminder['Date_Time']}")
+                reminders.remove(reminder)
+        time.sleep(60)  # Wait 1 minute
+
+def is_valid_email(email):
+    # Simple regex for basic email format checking
+    pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+    return re.match(pattern, email) is not None
+
+def add_reminder():
+    try:
+        title = input("Enter the title of the reminder: ")
+
+
+        date_time = input("Enter the date and time (YYYY-MM-DD HH:MM): ")
+        dt = datetime.datetime.strptime(date_time, "%Y-%m-%d %H:%M")
+        # Parse and check if date is in the future
+        if dt <= datetime.datetime.now():
+            print("You can't set a reminder in the past. Please enter a future date and time.")
+            return
+        date_time_str = dt.strftime("%Y-%m-%d %H:%M")
+
+        email = input("Enter your email for reminder alert: ")
+
+        # Check for valid email
+        if not is_valid_email(email):
+            print("Invalid email format. Please try again.")
+            return
+
+        reminder = {
+            "Title": title,
+            "Date_Time": date_time_str,
+            "Email": email
+        }
+        reminders.append(reminder)
+        print("Reminder added successfully!")
+    except ValueError as e:
+        print("Invalid date/time format. Please follow YYYY-MM-DD HH:MM",e)
+
+def view_reminder():
+    if not reminders:
+        print("No reminders found.")
+        return
+    for i, r in enumerate(reminders, 1):
+        print(f"{i}. {r['Title']} at {r['Date_Time']} | Email: {r['Email']}")
+
+def delete_reminder():
+    if not reminders:
+        print("No reminders to delete.")
+        return
+    view_reminder()
+    try:
+        choice = int(input("Enter the number of reminder to delete: "))
+        if 1 <= choice <= len(reminders):
+            removed = reminders.pop(choice - 1)
+            print(f"Deleted reminder: {removed['Title']}")
+        else:
+            print("Invalid choice.")
+    except ValueError:
+        print("Please enter a valid number.")
+
+def save_to_file():
+    try:
+        with open("reminder.json", "w") as f:
+            json.dump(reminders, f, indent=4)
+        print("Reminders saved.")
+    except Exception as e:
+        print("Error saving:", e)
+
+def load_from_file():
+    if os.path.exists("reminder.json"):
+        try:
+            with open("reminder.json", "r") as f:
+                data = json.load(f)
+                if isinstance(data, list):
+                    reminders.clear()
+                    reminders.extend(data)
+                    print("Reminders loaded.")
+        except Exception as e:
+            print("Error loading reminders:", e)
+
+def main():
+    print("=== Reminder App ===")
+    print("1. Add Reminder\n2. View Reminders\n3. Delete Reminder\n4. Save to File\n5. Load from File\n6. Exit")
+    while True:
+        try:
+            choice = int(input("Enter choice (1-6): "))
+            if choice == 1:
+                add_reminder()
+            elif choice == 2:
+                view_reminder()
+            elif choice == 3:
+                delete_reminder()
+            elif choice == 4:
+                save_to_file()
+            elif choice == 5:
+                load_from_file()
+            elif choice == 6:
+                print("Goodbye!")
+                break
+            else:
+                print("Invalid choice.")
+        except ValueError:
+            print("Enter a number from 1 to 6.")
+
+if __name__ == "__main__":
+    load_from_file()
+    threading.Thread(target=reminder_checker, daemon=True).start()
+    main()
