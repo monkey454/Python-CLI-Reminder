@@ -10,6 +10,7 @@ A **text-based reminder application** built with Python that sends both **deskto
 - ✅ Add reminders with a title, date/time, and email
 - 📨 Sends **email alerts** using Gmail SMTP
 - 🔔 Shows **desktop notifications** using Plyer
+- 💬 Sends **SMS alerts** using API
 - 💾 Save/load reminders to/from `reminder.json`
 - 🔁 Background thread checks reminders every minute
 - 🛡 Validates email format and prevents past time reminders
