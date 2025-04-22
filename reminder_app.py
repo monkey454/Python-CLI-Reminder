@@ -73,7 +73,7 @@ def is_valid_email(email):
 
 def is_valid_phone(phone):
     # Allows optional +, followed by 10 to 15 digits
-    pattern = r'^97798\d{8}$'
+    pattern = r'^9779\d{9}$'
     return re.match(pattern, phone) is not None
 
 def add_reminder():
@@ -88,19 +88,22 @@ def add_reminder():
             print("You can't set a reminder in the past. Please enter a future date and time.")
             return
         date_time_str = dt.strftime("%Y-%m-%d %H:%M")
+        while True:
+            email = input("Enter your email for reminder alert: ")
 
-        email = input("Enter your email for reminder alert: ")
-
-        # Check for valid email
-        if not is_valid_email(email):
-            print("Invalid email format. Please try again.")
-            return
-
-        phone_number = input("Enter your mobile number for reminder alert: ")
-        # check for valid phone number
-        if not is_valid_phone(phone_number):
-            print("Invalid email format. Please try again.")
-            return
+            # Check for valid email
+            if not is_valid_email(email):
+                print("Invalid email format. Please try again.")
+            else: 
+                break
+            
+        while True:
+            phone_number = input("Enter your mobile number for reminder alert: ")
+            # check for valid phone number
+            if not is_valid_phone(phone_number):
+                print("Invalid email format. Please try again.")
+            else:
+                break
 
 
         reminder = {
