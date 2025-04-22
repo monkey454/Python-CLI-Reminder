@@ -18,9 +18,14 @@ A **text-based reminder application** built with Python that sends both **deskto
 ---
 
 ## 📦 Requirements
+App Password for email alert
+
+Token key for SMS alert
 
 Install the required packages using pip:
 
 ```bash
 pip install plyer
+
+
 
