@@ -8,7 +8,9 @@ from email.message import EmailMessage
 from plyer import notification
 import re
 import requests
+
 reminders = []
+
 
 # Function to show desktop notification
 def send_notification(title, message):
@@ -18,11 +20,12 @@ def send_notification(title, message):
         timeout=10
     )
 
+
 # Function to send email (using Gmail SMTP)
 def send_email(subject, body, to_email):
     try:
-        sender_email = "xyz0123@gmail.com"         # <-- Change this
-        sender_password = ".................."         # <-- Use app password, not your real one
+        sender_email = "xyz0123@gmail.com"  # <-- Change this
+        sender_password = ".................."  # <-- Use app password, not your real one
 
         msg = EmailMessage()
         msg['Subject'] = subject
@@ -36,12 +39,14 @@ def send_email(subject, body, to_email):
         print(f"Email sent to {to_email}")
     except Exception as e:
         print("Error sending email:", e)
+
+
 # function to send sms
-def send_sms(to,message):
+def send_sms(to, message):
     url = "https://sms.xyz.com/sms/xx/sendxx/"  # with actual URL
 
     data = {
-        "auth_token": "012#$xyzabc", #enter the toke
+        "auth_token": "012#$xyzabc",  # enter the toke
         "to": to,
         "text": message
     }
@@ -53,6 +58,7 @@ def send_sms(to,message):
     print("Status Code:", response.status_code)
     print("Response JSON:", response.json())
 
+
 # Background thread to check reminders
 def reminder_checker():
     while True:
@@ -60,27 +66,31 @@ def reminder_checker():
         for reminder in reminders[:]:  # Use slice to avoid modifying_list during iteration
             if reminder["Date_Time"] == now:
                 send_notification(reminder["Title"], f"Reminder: {reminder['Title']} at {reminder['Date_Time']}")
-                send_email("Reminder Alert", f"Reminder: {reminder['Title']} at {reminder['Date_Time']}", reminder["Email"])
+                send_email("Reminder Alert", f"Reminder: {reminder['Title']} at {reminder['Date_Time']}",
+                           reminder["Email"])
                 send_sms(reminder["Phone_Number"], f"Reminder: {reminder['Title']} at {reminder['Date_Time']}")
                 print(f"\nReminder: {reminder['Title']} at {reminder['Date_Time']}")
                 reminders.remove(reminder)
         time.sleep(60)  # Wait 1 minute
+
 
 def is_valid_email(email):
     # Simple regex for basic email format checking
     pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
     return re.match(pattern, email) is not None
 
+
 def is_valid_phone(phone):
     # Allows optional +, followed by 10 to 15 digits
     pattern = r'^9779\d{9}$'
     return re.match(pattern, phone) is not None
 
-def add_reminder():
-    try:
-        title = input("Enter the title of the reminder: ")
 
-        while True:
+def add_reminder():
+    title = input("Enter the title of the reminder: ")
+    while True:
+
+        try:
             date_time = input("Enter the date and time (YYYY-MM-DD HH:MM): ")
             dt = datetime.datetime.strptime(date_time, "%Y-%m-%d %H:%M")
             # Parse and check if date is in the future
@@ -89,37 +99,35 @@ def add_reminder():
             else:
                 break
         except ValueError as e:
-            print("Invalid date/time format. Please follow YYYY-MM-DD HH:MM",e)
-            
-        date_time_str = dt.strftime("%Y-%m-%d %H:%M")
-        while True:
-            email = input("Enter your email for reminder alert: ")
+            print("Invalid date/time format. Please follow YYYY-MM-DD HH:MM", e)
 
-            # Check for valid email
-            if not is_valid_email(email):
-                print("Invalid email format. Please try again.")
-            else: 
-                break
-        
-            
-        while True:
-            phone_number = input("Enter your mobile number for reminder alert: ")
-            # check for valid phone number
-            if not is_valid_phone(phone_number):
-                print("Invalid email format. Please try again.")
-            else:
-                break
+    date_time_str = dt.strftime("%Y-%m-%d %H:%M")
+    while True:
+        email = input("Enter your email for reminder alert: ")
 
+        # Check for valid email
+        if not is_valid_email(email):
+            print("Invalid email format. Please try again.")
+        else:
+            break
 
-        reminder = {
-            "Title": title,
-            "Date_Time": date_time_str,
-            "Email": email,
-            "Phone_Number":phone_number
-        }
-        reminders.append(reminder)
-        print("Reminder added successfully!")
-   
+    while True:
+        phone_number = input("Enter your mobile number for reminder alert: ")
+        # check for valid phone number
+        if not is_valid_phone(phone_number):
+            print("Invalid email format. Please try again.")
+        else:
+            break
+
+    reminder = {
+        "Title": title,
+        "Date_Time": date_time_str,
+        "Email": email,
+        "Phone_Number": phone_number
+    }
+    reminders.append(reminder)
+    print("Reminder added successfully!")
+
 
 def view_reminder():
     if not reminders:
@@ -127,6 +135,7 @@ def view_reminder():
         return
     for i, r in enumerate(reminders, 1):
         print(f"{i}. {r['Title']} at {r['Date_Time']} | Email: {r['Email']}")
+
 
 def delete_reminder():
     if not reminders:
@@ -147,6 +156,7 @@ def delete_reminder():
         except ValueError:
             print("Please enter a valid number.")
 
+
 def save_to_file():
     try:
         with open("reminder.json", "w") as f:
@@ -154,6 +164,7 @@ def save_to_file():
         print("Reminders saved.")
     except Exception as e:
         print("Error saving:", e)
+
 
 def load_from_file():
     if os.path.exists("reminder.json"):
@@ -166,6 +177,7 @@ def load_from_file():
                     print("Reminders loaded.")
         except Exception as e:
             print("Error loading reminders:", e)
+
 
 def main():
     print("=== Reminder App ===")
@@ -190,6 +202,7 @@ def main():
                 print("Invalid choice.")
         except ValueError:
             print("Enter a number from 1 to 6.")
+
 
 if __name__ == "__main__":
     load_from_file()
