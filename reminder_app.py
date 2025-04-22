@@ -80,13 +80,17 @@ def add_reminder():
     try:
         title = input("Enter the title of the reminder: ")
 
-
-        date_time = input("Enter the date and time (YYYY-MM-DD HH:MM): ")
-        dt = datetime.datetime.strptime(date_time, "%Y-%m-%d %H:%M")
-        # Parse and check if date is in the future
-        if dt <= datetime.datetime.now():
-            print("You can't set a reminder in the past. Please enter a future date and time.")
-            return
+        while True:
+            date_time = input("Enter the date and time (YYYY-MM-DD HH:MM): ")
+            dt = datetime.datetime.strptime(date_time, "%Y-%m-%d %H:%M")
+            # Parse and check if date is in the future
+            if dt <= datetime.datetime.now():
+                print("You can't set a reminder in the past. Please enter a future date and time.")
+            else:
+                break
+        except ValueError as e:
+            print("Invalid date/time format. Please follow YYYY-MM-DD HH:MM",e)
+            
         date_time_str = dt.strftime("%Y-%m-%d %H:%M")
         while True:
             email = input("Enter your email for reminder alert: ")
@@ -96,6 +100,7 @@ def add_reminder():
                 print("Invalid email format. Please try again.")
             else: 
                 break
+        
             
         while True:
             phone_number = input("Enter your mobile number for reminder alert: ")
@@ -114,8 +119,7 @@ def add_reminder():
         }
         reminders.append(reminder)
         print("Reminder added successfully!")
-    except ValueError as e:
-        print("Invalid date/time format. Please follow YYYY-MM-DD HH:MM",e)
+   
 
 def view_reminder():
     if not reminders:
